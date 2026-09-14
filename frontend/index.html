@@ -1,14 +1,215 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Quantum Cats — Live Mint</title><script src="https://cdn.jsdelivr.net/npm/ethers@6.15.0/dist/ethers.umd.min.js"></script><style>
-:root{--bg:#0c0a08;--panel:#151210;--cream:#f3ead9;--orange:#f7931a;--violet:#9b8cff;--line:#2a241d;--muted:#a89a83}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--cream);font-family:Inter,system-ui,sans-serif}header{position:sticky;top:0;z-index:5;padding:18px 28px;background:#0c0a08e8;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.brand{font-family:Georgia,serif;font-size:1.2rem}.btn{border:1px solid var(--line);background:transparent;color:var(--cream);padding:12px 18px;border-radius:999px;cursor:pointer}.primary{background:var(--orange);color:#1a1100;border-color:var(--orange)}main{max-width:1100px;margin:auto;padding:80px 22px}.hero{text-align:center;padding:40px 0 70px}.eyebrow{color:var(--violet);font-family:monospace}.hero h1{font:italic 500 clamp(2.8rem,7vw,5.6rem)/1.03 Georgia,serif;margin:18px 0}.hero h1 span{color:var(--orange);font-style:normal}.hero p{max-width:620px;margin:0 auto;color:var(--muted);line-height:1.7}.panel{border:1px solid var(--line);background:var(--panel);border-radius:18px;padding:26px}.mint{max-width:650px;margin:0 auto}.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.quantity{width:100px;padding:12px;border-radius:10px;border:1px solid var(--line);background:#0c0a08;color:var(--cream)}.stats{display:grid;grid-template-columns:repeat(4,1fr);margin-top:30px;border:1px solid var(--line);border-radius:16px;overflow:hidden}.stat{padding:24px;text-align:center;border-right:1px solid var(--line)}.stat:last-child{border:0}.n{font-size:1.6rem;color:var(--orange);font-family:Georgia,serif}.l{color:var(--muted);font-size:.8rem;margin-top:5px}.status{margin-top:15px;color:var(--muted);font-family:monospace;word-break:break-word}.notice{margin-top:30px;color:#8f8675;font-size:.82rem;line-height:1.6}.ok{color:#6bd6b0}.err{color:#e8607a}@media(max-width:700px){.stats{grid-template-columns:1fr 1fr}.stat:nth-child(2){border-right:0}.stat:nth-child(3){border-top:1px solid var(--line)}.stat:nth-child(4){border-top:1px solid var(--line);border-right:0}}
-</style></head><body><header><div class="brand">🐈 Quantum Cats</div><button id="connect" class="btn primary">Connect wallet</button></header><main><section class="hero"><div class="eyebrow">LIVE ON-CHAIN MINT</div><h1>Look.<br><span>Collapse.</span><br>Own the cat.</h1><p>A real ERC-721 minting interface. Your wallet signs the transaction; the contract enforces price, supply and per-wallet limits.</p></section><section class="panel mint"><h2>Mint a Quantum Cat</h2><div class="row"><input id="qty" class="quantity" type="number" min="1" max="20" value="1"><button id="mint" class="btn primary">Mint</button><button id="owned" class="btn">Check my balance</button></div><div id="status" class="status">Connect a wallet to begin.</div><div class="notice">Never enter a seed phrase or private key here. The site only requests a normal wallet connection and a transaction signature.</div></section><section class="stats"><div class="stat"><div id="supply" class="n">—</div><div class="l">Minted</div></div><div class="stat"><div id="max" class="n">10,000</div><div class="l">Max supply</div></div><div class="stat"><div id="price" class="n">—</div><div class="l">Price / cat</div></div><div class="stat"><div id="network" class="n">—</div><div class="l">Network</div></div></section></main><script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Quantum Cats — Measured, Not Minted</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/ethers@6.15.0/dist/ethers.umd.min.js"></script>
+<style>
+:root{--bg:#070606;--panel:#100d0b;--panel2:#15100d;--cream:#f5ead8;--muted:#9e927e;--orange:#f7931a;--violet:#9b8cff;--green:#70e0b4;--line:#29211b;--danger:#ff6f7d}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
+body{background:radial-gradient(circle at 50% -10%,#24170e 0,#0b0807 35%,var(--bg) 70%);color:var(--cream);font-family:Inter,sans-serif;overflow-x:hidden}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.08;background-image:radial-gradient(#fff 1px,transparent 1px);background-size:4px 4px;mix-blend-mode:screen}
+a{color:inherit;text-decoration:none}button{font:inherit}
+header{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:16px 4vw;background:rgba(7,6,6,.78);backdrop-filter:blur(18px);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;font-family:Fraunces,serif;font-size:1.15rem;font-weight:600}.brand svg{width:28px}
+nav{display:flex;gap:28px;color:var(--muted);font-size:.88rem}nav a:hover{color:var(--cream)}
+.wallet{border:1px solid var(--orange);background:transparent;color:var(--cream);padding:10px 16px;border-radius:999px;cursor:pointer;transition:.25s}.wallet:hover{background:var(--orange);color:#160d00}
+.marquee{overflow:hidden;border-bottom:1px solid var(--line);background:#0d0a08;white-space:nowrap}
+.marquee-track{display:inline-block;padding:9px 0;font:700 .7rem JetBrains Mono;color:var(--muted);letter-spacing:.12em;animation:scroll 25s linear infinite}.marquee-track span{margin:0 2rem}.hot{color:var(--orange)}
+@keyframes scroll{to{transform:translateX(-50%)}}@keyframes pulse{0%,100%{transform:scale(1);opacity:.55}50%{transform:scale(1.18);opacity:1}}
+@keyframes float{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-15px) rotate(3deg)}}
+@keyframes spin{to{transform:rotate(360deg)}}@keyframes glow{50%{box-shadow:0 0 45px rgba(247,147,26,.24),inset 0 0 35px rgba(155,140,255,.08)}}
+.hero{min-height:780px;position:relative;display:grid;place-items:center;padding:80px 5vw 110px;overflow:hidden}
+.field,.field:before,.field:after{position:absolute;inset:-20%;content:"";pointer-events:none}.field{background:radial-gradient(circle at 50% 45%,rgba(247,147,26,.09),transparent 26%),radial-gradient(circle at 52% 45%,rgba(155,140,255,.08),transparent 45%)}
+.field:before{background-image:linear-gradient(rgba(247,147,26,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(247,147,26,.06) 1px,transparent 1px);background-size:70px 70px;transform:perspective(500px) rotateX(65deg) translateY(30%);mask-image:linear-gradient(to top,black,transparent 70%)}
+.orbit{position:absolute;width:min(65vw,650px);aspect-ratio:1;border:1px solid rgba(155,140,255,.22);border-radius:50%;animation:spin 30s linear infinite}.orbit:before,.orbit:after{content:"";position:absolute;width:8px;height:8px;border-radius:50%;background:var(--orange);box-shadow:0 0 20px var(--orange);top:12%;left:18%}.orbit:after{background:var(--violet);box-shadow:0 0 20px var(--violet);top:auto;left:auto;right:14%;bottom:18%}
+.hero-grid{position:relative;z-index:2;width:min(1180px,100%);display:grid;grid-template-columns:1.1fr .9fr;gap:60px;align-items:center}
+.eyebrow{font:700 .72rem JetBrains Mono;color:var(--violet);letter-spacing:.15em;text-transform:uppercase;margin-bottom:20px}
+h1{font:500 clamp(3rem,7vw,6.5rem) Fraunces,serif;line-height:.93;letter-spacing:-.04em}h1 em{color:var(--orange);font-style:normal}
+.lede{max-width:650px;color:var(--muted);line-height:1.75;margin:28px 0;font-size:1rem}
+.ctas{display:flex;gap:12px;flex-wrap:wrap}.btn{border:1px solid var(--line);background:transparent;color:var(--cream);padding:13px 20px;border-radius:999px;cursor:pointer;transition:.25s}.btn:hover{transform:translateY(-2px);border-color:var(--cream)}.btn.primary{background:var(--orange);border-color:var(--orange);color:#170d00;font-weight:700}
+.cat-stage{display:grid;place-items:center;min-height:440px;position:relative}.cat-core{width:240px;height:240px;border-radius:50%;display:grid;place-items:center;position:relative;animation:float 6s ease-in-out infinite,glow 3s ease-in-out infinite;border:1px solid rgba(247,147,26,.35);background:radial-gradient(circle,#28180c 0,#120d0a 55%,transparent 70%)}
+.cat-core:before{content:"";position:absolute;inset:-35px;border:1px dashed rgba(155,140,255,.32);border-radius:50%;animation:spin 16s linear infinite}.cat-core:after{content:"";position:absolute;inset:-70px;border:1px solid rgba(247,147,26,.1);border-radius:50%;animation:spin 22s linear infinite reverse}
+.cat-svg{width:160px;filter:drop-shadow(0 0 18px rgba(247,147,26,.35))}.cat-svg path{stroke:var(--orange)}.cat-svg circle{fill:var(--orange)}
+.heart{position:absolute;right:12%;top:15%;font:700 .7rem JetBrains Mono;color:var(--orange)}.heart b{display:inline-block;animation:pulse 1.15s ease-in-out infinite;font-size:1.3rem;margin-right:5px}
+.live-panel{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);width:min(480px,88%);border:1px solid var(--line);background:rgba(16,13,11,.86);backdrop-filter:blur(10px);padding:13px 16px;border-radius:14px;display:flex;justify-content:space-between;font:700 .68rem JetBrains Mono;color:var(--muted)}.live-dot{color:var(--green)}
+section{padding:105px 5vw;border-top:1px solid var(--line)}.section-head{width:min(1150px,100%);margin:auto;display:flex;justify-content:space-between;gap:30px;align-items:end;margin-bottom:45px}.kicker{font:700 .7rem JetBrains Mono;color:var(--violet);letter-spacing:.15em;text-transform:uppercase}.section-head h2{font:500 clamp(2rem,4vw,3.4rem) Fraunces,serif;margin-top:9px}.section-head p{max-width:420px;color:var(--muted);line-height:1.65}
+.mint-wrap{width:min(1150px,100%);margin:auto;display:grid;grid-template-columns:1fr 430px;gap:24px}.lab{border:1px solid var(--line);background:linear-gradient(145deg,#15100d,#0b0908);border-radius:22px;padding:34px;min-height:430px;position:relative;overflow:hidden}.lab h3{font:500 1.7rem Fraunces,serif}.lab-sub{color:var(--muted);font-size:.85rem;margin-top:8px}.signal{height:150px;margin:35px 0;border:1px solid #2d241c;border-radius:16px;position:relative;overflow:hidden;background:repeating-linear-gradient(0deg,transparent 0 28px,rgba(247,147,26,.05) 29px),repeating-linear-gradient(90deg,transparent 0 38px,rgba(155,140,255,.05) 39px)}.signal svg{width:100%;height:100%}.wave{fill:none;stroke:var(--orange);stroke-width:1.5;stroke-dasharray:7 9;animation:dash 2.5s linear infinite}@keyframes dash{to{stroke-dashoffset:-100}}
+.bars{display:grid;gap:12px}.bar-row{display:grid;grid-template-columns:90px 1fr 45px;gap:10px;align-items:center;font:700 .62rem JetBrains Mono;color:var(--muted)}.bar{height:5px;background:#241d17;border-radius:5px;overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--violet),var(--orange));border-radius:inherit}
+.mint-card{border:1px solid rgba(247,147,26,.25);background:rgba(16,13,11,.9);border-radius:22px;padding:28px;box-shadow:0 0 60px rgba(247,147,26,.05)}.mint-card h3{font:500 2rem Fraunces,serif}.network{display:flex;justify-content:space-between;margin:12px 0 28px;font:700 .65rem JetBrains Mono;color:var(--muted)}.network strong{color:var(--green)}.supply{height:7px;background:#241d17;border-radius:7px;overflow:hidden;margin:10px 0 25px}.supply i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--violet),var(--orange));transition:width 1s}.mint-line{display:flex;justify-content:space-between;padding:13px 0;border-bottom:1px solid var(--line);color:var(--muted);font-size:.8rem}.mint-line strong{color:var(--cream)}.qty{display:flex;gap:10px;margin:20px 0}.qty button{width:42px;border:1px solid var(--line);background:#0b0908;color:var(--cream);border-radius:10px;cursor:pointer}.qty input{flex:1;text-align:center;border:1px solid var(--line);background:#0b0908;color:var(--cream);border-radius:10px;font-weight:700}.mint-action{width:100%;margin-top:10px}.status{min-height:35px;margin-top:12px;color:var(--muted);font:600 .65rem JetBrains Mono;line-height:1.5}.wallet-info{display:none;margin-top:16px;padding:13px;border:1px solid var(--line);border-radius:12px;background:#0b0908;font:600 .66rem JetBrains Mono}.wallet-info.show{display:block}
+.stats{width:min(1150px,100%);margin:auto;display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);border-radius:18px;overflow:hidden}.stat{padding:28px 20px;text-align:center;border-right:1px solid var(--line)}.stat:last-child{border-right:0}.stat .n{font:500 2.3rem Fraunces;color:var(--orange)}.stat .l{font-size:.68rem;color:var(--muted);margin-top:5px}
+.collection{width:min(1150px,100%);margin:auto}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}.nft{aspect-ratio:1;border:1px solid var(--line);border-radius:17px;overflow:hidden;position:relative;background:radial-gradient(circle at 50% 35%,#2b1b10,#0c0908 65%);transition:.3s}.nft:hover{transform:translateY(-7px) rotateX(2deg);border-color:#514031;box-shadow:0 20px 50px rgba(0,0,0,.35)}.nft:nth-child(2){background:radial-gradient(circle at 50% 35%,#21152d,#0c0908 65%)}.nft:nth-child(3){background:radial-gradient(circle at 50% 35%,#10221d,#0c0908 65%)}.nft:nth-child(4){background:radial-gradient(circle at 50% 35%,#29131a,#0c0908 65%)}.nft .cat-svg{position:absolute;inset:15%;width:70%;height:70%}.nft .meta{position:absolute;bottom:0;left:0;right:0;padding:14px;background:linear-gradient(transparent,rgba(0,0,0,.9));font:700 .65rem JetBrains Mono;display:flex;justify-content:space-between}.tag{color:var(--muted)}
+.protocol{width:min(1150px,100%);margin:auto;display:grid;grid-template-columns:repeat(3,1fr);gap:15px}.step{border:1px solid var(--line);border-radius:18px;padding:28px;background:#0d0a08}.step b{font:700 .65rem JetBrains Mono;color:var(--orange)}.step h3{font:500 1.5rem Fraunces;margin:20px 0 10px}.step p{color:var(--muted);font-size:.85rem;line-height:1.65}
+footer{padding:80px 5vw;text-align:center;border-top:1px solid var(--line)}footer h2{font:500 3rem Fraunces;margin-bottom:12px}footer p{color:var(--muted);font-size:.85rem}.fine{max-width:700px;margin:35px auto 0;padding-top:20px;border-top:1px solid var(--line);font-size:.65rem!important;line-height:1.6}
+@media(max-width:900px){.hero-grid,.mint-wrap{grid-template-columns:1fr}.cat-stage{min-height:380px}.grid{grid-template-columns:repeat(2,1fr)}.stats{grid-template-columns:repeat(2,1fr)}.stat:nth-child(2){border-right:0}.stat:nth-child(-n+2){border-bottom:1px solid var(--line)}.protocol{grid-template-columns:1fr}nav{display:none}}
+@media(max-width:600px){header{padding:14px 18px}.hero{min-height:auto;padding:70px 18px 100px}.hero-grid{gap:20px}.cat-core{width:190px;height:190px}.cat-svg{width:125px}.section-head{display:block}.section-head p{margin-top:16px}.mint-wrap,section{padding-left:18px;padding-right:18px}.lab,.mint-card{padding:22px}.grid{gap:10px}.live-panel{font-size:.55rem}.heart{right:4%;top:8%}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div class="marquee"><div class="marquee-track"><span class="hot">◆ QUANTUM CATS</span><span>MEASURED, NOT MINTED</span><span>◆ ROBINHOOD CHAIN</span><span>ON-CHAIN OWNERSHIP</span><span class="hot">◆ LIVE MINT</span><span>QUANTUM CATS</span><span>MEASURED, NOT MINTED</span><span>◆ ROBINHOOD CHAIN</span><span>ON-CHAIN OWNERSHIP</span><span class="hot">◆ LIVE MINT</span></div></div>
+
+<header>
+  <a class="brand" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="1.6"><path d="M4 10 L6 4 L10 8 L14 8 L18 4 L20 10 C20 16 16 20 12 20 C8 20 4 16 4 10 Z"/><circle cx="9.5" cy="11" r=".6" fill="var(--orange)"/><circle cx="14.5" cy="11" r=".6" fill="var(--orange)"/></svg>Quantum Cats</a>
+  <nav><a href="#lore">Lore</a><a href="#mint">Mint</a><a href="#collection">Collection</a><a href="#protocol">Protocol</a></nav>
+  <button class="wallet" id="connectBtn">Connect Wallet</button>
+</header>
+
+<main>
+<section class="hero">
+  <div class="field"></div><div class="orbit"></div>
+  <div class="hero-grid">
+    <div>
+      <div class="eyebrow">ON-CHAIN NFT EXPERIENCE / ROBINHOOD</div>
+      <h1>A cat that stays <em>uncertain</em> until you look.</h1>
+      <p class="lede">Enter a living digital collection built around observation, ownership and collapse. Explore the field, connect your wallet and mint directly from the smart contract.</p>
+      <div class="ctas"><a class="btn primary" href="#mint">Enter the Mint</a><a class="btn" href="#lore">Read the Lore ↓</a></div>
+    </div>
+    <div class="cat-stage">
+      <div class="cat-core">
+        <svg class="cat-svg" viewBox="0 0 100 100" fill="none"><path d="M20 45 L28 20 L42 35 L58 35 L72 20 L80 45 C80 70 65 85 50 85 C35 85 20 70 20 45 Z" stroke-width="2"/><circle cx="40" cy="52" r="2.8"/><circle cx="60" cy="52" r="2.8"/></svg>
+      </div>
+      <div class="heart"><b>♥</b> FIELD PULSE / LIVE</div>
+      <div class="live-panel"><span class="live-dot">● LIVE FIELD</span><span id="heroSupply">SUPPLY: — / 10,000</span><span>NETWORK: ROBINHOOD</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="mint">
+  <div class="section-head"><div><div class="kicker">01 / QUANTUM LAB</div><h2>Watch the state resolve.</h2></div><p>A visual layer for the mint experience. The animation is thematic; the blockchain transaction remains the source of truth for ownership.</p></div>
+  <div class="mint-wrap">
+    <div class="lab">
+      <h3>Quantum State Monitor</h3><div class="lab-sub">FIELD SIGNAL // COLLAPSE SIMULATION</div>
+      <div class="signal"><svg viewBox="0 0 600 150" preserveAspectRatio="none"><path class="wave" d="M0 80 C35 20 55 125 90 73 S145 65 175 83 S225 145 260 72 S310 30 350 80 S405 110 440 69 S500 35 540 82 S570 112 600 62"/></svg></div>
+      <div class="bars">
+        <div class="bar-row"><span>VOID</span><div class="bar"><i style="width:68%"></i></div><span>68%</span></div>
+        <div class="bar-row"><span>PLASMA</span><div class="bar"><i style="width:44%"></i></div><span>44%</span></div>
+        <div class="bar-row"><span>NEON</span><div class="bar"><i style="width:82%"></i></div><span>82%</span></div>
+        <div class="bar-row"><span>COSMIC</span><div class="bar"><i style="width:31%"></i></div><span>31%</span></div>
+      </div>
+    </div>
+    <div class="mint-card">
+      <div class="kicker">MINT TERMINAL</div><h3>Collapse a Cat</h3>
+      <div class="network"><span>NETWORK</span><strong>● ROBINHOOD CHAIN</strong></div>
+      <div class="mint-line"><span>AVAILABLE</span><strong id="available">— / 10,000</strong></div>
+      <div class="supply"><i id="supplyBar"></i></div>
+      <div class="mint-line"><span>PRICE</span><strong id="price">— ETH</strong></div>
+      <div class="mint-line"><span>MAX / WALLET</span><strong id="walletLimit">—</strong></div>
+      <div class="qty"><button id="minus">−</button><input id="qty" value="1" inputmode="numeric"><button id="plus">+</button></div>
+      <button class="btn primary mint-action" id="mintBtn">Connect Wallet to Mint</button>
+      <div class="status" id="status">Connect your wallet to load live contract data.</div>
+      <div class="wallet-info" id="walletInfo"></div>
+    </div>
+  </div>
+</section>
+
+<section id="lore">
+  <div class="section-head"><div><div class="kicker">02 / THE LORE</div><h2>Observation changes the story.</h2></div><p>The collection treats every mint as a moment: before the transaction, possibility; after confirmation, an on-chain fact.</p></div>
+  <div class="protocol">
+    <div class="step"><b>01 / ENTER</b><h3>Approach the field.</h3><p>Connect an EVM wallet and enter the live mint terminal. Your wallet stays under your control; the site only requests normal connection and transaction approval.</p></div>
+    <div class="step"><b>02 / COLLAPSE</b><h3>Sign the transaction.</h3><p>The mint button calls the deployed QuantumCats contract. The blockchain records the mint and the receiving wallet.</p></div>
+    <div class="step"><b>03 / OWN</b><h3>It becomes yours.</h3><p>Once confirmed, the NFT exists on-chain and can be viewed through the network explorer and compatible NFT tooling.</p></div>
+  </div>
+</section>
+
+<section id="collection">
+  <div class="section-head"><div><div class="kicker">03 / COLLECTION</div><h2>A few, mid-collapse.</h2></div><p>These cards are visual placeholders until real NFT artwork and metadata are connected to the deployed collection.</p></div>
+  <div class="collection"><div class="grid">
+    <div class="nft"><svg class="cat-svg" viewBox="0 0 100 100" fill="none"><path d="M20 45 L28 20 L42 35 L58 35 L72 20 L80 45 C80 70 65 85 50 85 C35 85 20 70 20 45 Z" stroke-width="2"/><circle cx="40" cy="52" r="2.8"/><circle cx="60" cy="52" r="2.8"/></svg><div class="meta"><span>#0001</span><span class="tag">RESOLVING</span></div></div>
+    <div class="nft"><svg class="cat-svg" viewBox="0 0 100 100" fill="none"><path d="M20 45 L28 20 L42 35 L58 35 L72 20 L80 45 C80 70 65 85 50 85 C35 85 20 70 20 45 Z" stroke="var(--violet)" stroke-width="2"/><circle cx="40" cy="52" r="2.8" fill="var(--violet)"/><circle cx="60" cy="52" r="2.8" fill="var(--violet)"/></svg><div class="meta"><span>#0002</span><span class="tag">UNKNOWN</span></div></div>
+    <div class="nft"><svg class="cat-svg" viewBox="0 0 100 100" fill="none"><path d="M20 45 L28 20 L42 35 L58 35 L72 20 L80 45 C80 70 65 85 50 85 C35 85 20 70 20 45 Z" stroke="var(--green)" stroke-width="2"/><circle cx="40" cy="52" r="2.8" fill="var(--green)"/><circle cx="60" cy="52" r="2.8" fill="var(--green)"/></svg><div class="meta"><span>#0003</span><span class="tag">COLLAPSED</span></div></div>
+    <div class="nft"><svg class="cat-svg" viewBox="0 0 100 100" fill="none"><path d="M20 45 L28 20 L42 35 L58 35 L72 20 L80 45 C80 70 65 85 50 85 C35 85 20 70 20 45 Z" stroke="#e8607a" stroke-width="2"/><circle cx="40" cy="52" r="2.8" fill="#e8607a"/><circle cx="60" cy="52" r="2.8" fill="#e8607a"/></svg><div class="meta"><span>#0004</span><span class="tag">COLLAPSED</span></div></div>
+  </div></div>
+</section>
+
+<section>
+  <div class="stats">
+    <div class="stat"><div class="n" id="statSupply">—</div><div class="l">TOTAL SUPPLY</div></div>
+    <div class="stat"><div class="n" id="statMinted">—</div><div class="l">MINTED</div></div>
+    <div class="stat"><div class="n" id="statPercent">—</div><div class="l">MINTED RATE</div></div>
+    <div class="stat"><div class="n" id="statPrice">—</div><div class="l">MINT PRICE</div></div>
+  </div>
+</section>
+
+<section id="protocol">
+  <div class="section-head"><div><div class="kicker">04 / PROTOCOL</div><h2>Simple on-chain mechanics.</h2></div><p>Live contract data is read directly by the browser. Mint transactions are signed by the connected wallet.</p></div>
+  <div class="protocol">
+    <div class="step"><b>CONTRACT</b><h3>ERC-721</h3><p>Quantum Cats is an EVM NFT contract with wallet limits, mint pricing, royalties and owner controls.</p></div>
+    <div class="step"><b>NETWORK</b><h3>Robinhood Chain</h3><p>The interface is prepared for the Robinhood Chain deployment. Replace the contract address below after deploying the contract there.</p></div>
+    <div class="step"><b>TRUTH</b><h3>Blockchain first.</h3><p>Visual effects are presentation. Ownership, supply and mint transactions are read from the deployed contract.</p></div>
+  </div>
+</section>
+</main>
+
+<footer><h2>Go on. Look.</h2><p>The field is waiting.</p><div class="fine">This interface is an independently built NFT front-end. Do not send funds or sign transactions unless the contract address, network and project details have been independently verified. The visual quantum effects do not claim to be a genuine quantum-randomness oracle.</div></footer>
+
+<script>
 const CONFIG={contractAddress:"0xdf170b85a28DD524b1ae32Abb5e9e408aE7c4aA5",chainId:"0xB626",chainName:"Robinhood Chain Testnet",explorer:"https://explorer.testnet.chain.robinhood.com"};
-const ABI=["function mint(uint256 quantity) payable returns(uint256)","function totalSupply() view returns(uint256)","function MAX_SUPPLY() view returns(uint256)","function mintPrice() view returns(uint256)","function maxPerWallet() view returns(uint256)","function balanceOf(address) view returns(uint256)","function revealed() view returns(bool)","event Minted(address indexed minter,uint256 indexed tokenId)"];
-let provider,signer,contract;
-const $=id=>document.getElementById(id), setStatus=(m,c='')=>{$('status').className='status '+c;$('status').textContent=m};
-function validConfig(){return /^0x[0-9a-fA-F]{40}$/.test(CONFIG.contractAddress)&&CONFIG.contractAddress!=='0x0000000000000000000000000000000000000000'}
-async function connect(){try{if(!window.ethereum)throw Error('No EVM wallet detected. Install MetaMask or another compatible wallet.');provider=new ethers.BrowserProvider(window.ethereum);await provider.send('eth_requestAccounts',[]);const net=await provider.getNetwork();if('0x'+net.chainId.toString(16)!==CONFIG.chainId) {try{await window.ethereum.request({method:'wallet_switchEthereumChain',params:[{chainId:CONFIG.chainId}]})}catch(e){throw Error('Please switch your wallet to '+CONFIG.chainName+'.')}} signer=await provider.getSigner();contract=new ethers.Contract(CONFIG.contractAddress,ABI,signer);const addr=await signer.getAddress();$('connect').textContent=addr.slice(0,6)+'…'+addr.slice(-4);await refresh();setStatus('Wallet connected: '+addr,'ok')}catch(e){setStatus(e.shortMessage||e.message||String(e),'err')}}
-async function refresh(){if(!contract)return;if(!validConfig()){setStatus('Set CONFIG.contractAddress after deploying the contract.','err');return}try{const [s,p,n]=await Promise.all([contract.totalSupply(),contract.mintPrice(),provider.getNetwork()]);$('supply').textContent=s.toString();$('price').textContent=ethers.formatEther(p)+' ETH';$('network').textContent=CONFIG.chainName}catch(e){setStatus(e.shortMessage||e.message,'err')}}
-async function mint(){try{if(!contract)await connect();if(!contract)return;const q=Number($('qty').value);if(!Number.isInteger(q)||q<1||q>20)throw Error('Quantity must be 1–20.');const price=await contract.mintPrice();setStatus('Waiting for wallet signature…');const tx=await contract.mint(q,{value:price*BigInt(q)});setStatus('Transaction submitted: '+tx.hash);await tx.wait();setStatus('Mint confirmed. Your cat is on-chain. '+tx.hash,'ok');await refresh()}catch(e){setStatus(e.shortMessage||e.reason||e.message||String(e),'err')}}
-async function owned(){try{if(!contract)await connect();if(!contract)return;const a=await signer.getAddress();const b=await contract.balanceOf(a);setStatus('Wallet '+a+' owns '+b.toString()+' Quantum Cat(s).','ok')}catch(e){setStatus(e.shortMessage||e.message,'err')}}
-$('connect').onclick=connect;$('mint').onclick=mint;$('owned').onclick=owned;if(validConfig())setStatus('Ready. Connect your wallet.');else setStatus('Deployment required: set the contract address in CONFIG.','err');
-</script></body></html>
+const ABI=[
+ "function mint(uint256 quantity) payable returns(uint256)",
+ "function totalSupply() view returns(uint256)",
+ "function MAX_SUPPLY() view returns(uint256)",
+ "function mintPrice() view returns(uint256)",
+ "function maxPerWallet() view returns(uint256)",
+ "function balanceOf(address) view returns(uint256)",
+ "function mintedByWallet(address) view returns(uint256)",
+ "event Minted(address indexed minter,uint256 indexed tokenId)"
+];
+let provider,signer,contract,userAddress;
+const $=id=>document.getElementById(id);
+function short(a){return a?`${a.slice(0,6)}...${a.slice(-4)}`:"—"}
+function setStatus(t,good=false){$("status").textContent=t;$("status").style.color=good?"var(--green)":"var(--muted)"}
+async function connectWallet(){
+ if(!window.ethereum){setStatus("MetaMask or another EVM wallet was not detected.");return}
+ try{
+   provider=new ethers.BrowserProvider(window.ethereum);
+   const net=await provider.getNetwork();
+   if(Number(net.chainId)!==46630){try{await window.ethereum.request({method:"wallet_switchEthereumChain",params:[{chainId:CONFIG.chainId}]})}catch(e){setStatus("Please switch your wallet to Robinhood Chain Testnet (Chain ID 46630).");return}}
+   await provider.send("eth_requestAccounts",[]);
+   signer=await provider.getSigner();userAddress=await signer.getAddress();
+   contract=new ethers.Contract(CONFIG.contractAddress,ABI,signer);
+   $("connectBtn").textContent=short(userAddress);
+   $("walletInfo").classList.add("show");
+   await refresh();
+   setStatus("Wallet connected. Contract data loaded.",true);
+ }catch(e){console.error(e);setStatus(e.shortMessage||e.message||"Wallet connection failed.")}
+}
+async function refresh(){
+ if(!contract)return;
+ try{
+   const [supply,max,price,limit,balance,minted]=await Promise.all([
+     contract.totalSupply(),contract.MAX_SUPPLY(),contract.mintPrice(),contract.maxPerWallet(),contract.balanceOf(userAddress),contract.mintedByWallet(userAddress)
+   ]);
+   const sn=Number(supply),mx=Number(max),pn=Number(ethers.formatEther(price));
+   $("heroSupply").textContent=`SUPPLY: ${sn.toLocaleString()} / ${mx.toLocaleString()}`;
+   $("available").textContent=`${sn.toLocaleString()} / ${mx.toLocaleString()}`;
+   $("price").textContent=`${pn} ETH`;
+   $("walletLimit").textContent=`${limit.toString()} / wallet`;
+   $("supplyBar").style.width=`${Math.min(100,(sn/mx)*100)}%`;
+   $("statSupply").textContent=mx.toLocaleString();$("statMinted").textContent=sn.toLocaleString();
+   $("statPercent").textContent=`${((sn/mx)*100).toFixed(2)}%`;$("statPrice").textContent=`${pn} ETH`;
+   $("walletInfo").innerHTML=`WALLET <strong>${short(userAddress)}</strong><br><br>YOUR NFTs: <strong>${balance.toString()}</strong><br>MINTED FROM THIS WALLET: <strong>${minted.toString()} / ${limit.toString()}</strong>`;
+ }catch(e){console.error(e);setStatus("Could not read contract data. Check the contract address and network.")}
+}
+async function mint(){
+ if(!signer){await connectWallet();if(!signer)return}
+ const q=Math.max(1,Math.min(20,parseInt($("qty").value)||1));$("qty").value=q;
+ try{
+   const price=await contract.mintPrice();const total=price*BigInt(q);
+   setStatus(`Preparing ${q} cat${q>1?"s":""}...`);
+   const tx=await contract.mint(q,{value:total});
+   setStatus(`Transaction submitted: ${tx.hash.slice(0,10)}... Waiting for confirmation...`);
+   await tx.wait();setStatus("✓ Mint confirmed on-chain.",true);await refresh();
+ }catch(e){console.error(e);setStatus(e.shortMessage||e.reason||"Mint cancelled or failed.")}
+}
+$("connectBtn").addEventListener("click",connectWallet);$("mintBtn").addEventListener("click",mint);
+$("minus").addEventListener("click",()=>{$("qty").value=Math.max(1,(parseInt($("qty").value)||1)-1)});
+$("plus").addEventListener("click",()=>{$("qty").value=Math.min(20,(parseInt($("qty").value)||1)+1)});
+$("qty").addEventListener("input",()=>{$("qty").value=$("qty").value.replace(/\D/g,"").slice(0,2)||"1"});
+if(window.ethereum){window.ethereum.on("accountsChanged",()=>location.reload());window.ethereum.on("chainChanged",()=>location.reload())}
+</script>
+</body>
+</html>
